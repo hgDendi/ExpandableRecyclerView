@@ -7,14 +7,14 @@ It encapsulates the **expand and fold operation** in abstract class [ExpandableL
 
 See the usage below , all you need to do is just extending the class and overriding these 5 methods:
 
-* getGroupCount
-* getGroupPosition
+* **getGroupCount**
+* **getGroupPosition**
 * onCreateGroupViewHolder
 * onCreateChildViewHolder
 * onBindGroupViewHolder
 * onBindChildViewHolder
 
-As onCreateViewHolder & onBindViewHolder are compulsive methods which need develop to override. All your extra work is overriding getGroupCount & getGroupPosition. In most conditions , it is just a one-line-method.
+As onCreateViewHolder & onBindViewHolder are compulsive methods which need developers to override. All your extra work is overriding getGroupCount & getGroupPosition. In most conditions , it is just a one-line-method.
 
 ## Gradle
 
