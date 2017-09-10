@@ -3,9 +3,9 @@ Customized recyclerViewAdapter which shows items in a 2-level list.
 
 ![demo](https://github.com/hgDendi/ExpandableRecyclerView/blob/master/README_support/expandableRecyclerView.gif)
 
-It encapsulates the **expand and fold operation** in abstract class ExpandableListAdapter,which makes it flexible.
+It encapsulates the **expand and fold operation** in abstract class [ExpandableListAdapter](https://github.com/hgDendi/ExpandableRecyclerView/blob/master/expandablerecycleradapter/src/main/java/com/hgdendi/expandablerecycleradapter/ExpandableRecyclerViewAdapter.java),which makes it flexible.
 
-See the usage below , all you need is just implements the class and override these 5 methods:
+See the usage below , all you need to do is just extending the class and overriding these 5 methods:
 
 * getGroupCount
 * getGroupPosition
@@ -14,7 +14,7 @@ See the usage below , all you need is just implements the class and override the
 * onBindGroupViewHolder
 * onBindChildViewHolder
 
-As onCreateViewHolder & onBindViewHolder ar compulsive methods which need develop to override.All you need is override getGroupCount & getGroupPosition. In most conditions , it is just a one-line-method.
+As onCreateViewHolder & onBindViewHolder are compulsive methods which need develop to override. All your extra work is overriding getGroupCount & getGroupPosition. In most conditions , it is just a one-line-method.
 
 ## Gradle
 
