@@ -69,9 +69,9 @@ class ChildVH extends RecyclerView.ViewHolder {
 }
     
 class GroupBean implements ExpandableRecyclerViewAdapter.GroupNode {
-	@Override
-	public int getChildCount() {
-	}
+    @Override
+    public int getChildCount() {
+    }
 }
 ```
 
