@@ -5,7 +5,7 @@
  * Copyright (c) 2017 hg.dendi
  * <p>
  * MIT License
- * http://www.opensource.org/licenses/mit-license.php
+ * https://rem.mit-license.org/
  * <p>
  * email: hg.dendi@gmail.com
  * Date: 2017-09-01

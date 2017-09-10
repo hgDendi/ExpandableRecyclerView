@@ -59,7 +59,11 @@ public class SampleAdapter extends ExpandableRecyclerViewAdapter
     }
 }
 
-//generic classes , below is the sample
+```
+
+Relating classes:
+
+```
 class GroupVH extends RecyclerView.ViewHolder {
     //customize
 }
@@ -75,3 +79,8 @@ class GroupBean implements ExpandableRecyclerViewAdapter.GroupNode {
 }
 ```
 
+## License
+
+**MIT**
+
+https://rem.mit-license.org/
