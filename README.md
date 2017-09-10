@@ -1,7 +1,7 @@
 # ExpandableRecyclerView
 Customized recyclerViewAdapter which shows items in a 2-level list.
 
-![demo]()
+![demo](https://github.com/hgDendi/ExpandableRecyclerView/blob/master/README_support/expandableRecyclerView.gif)
 
 ## Gradle
 
