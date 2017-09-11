@@ -33,12 +33,8 @@ public abstract class ExpandableRecyclerViewAdapter
     private static final int TYPE_GROUP = 0;
     private static final int TYPE_CHILD = 1;
 
-    private Set<Integer> mExpandGroupList;
+    private Set<Integer> mExpandGroupList = new TreeSet<>();
     private ExpandableRecyclerViewOnClickListener mListener;
-
-    public ExpandableRecyclerViewAdapter() {
-        mExpandGroupList = new TreeSet<>();
-    }
 
     /******************
      * abstract methods
@@ -69,6 +65,9 @@ public abstract class ExpandableRecyclerViewAdapter
     }
 
     public final boolean expandGroup(int groupIndex) {
+        if (getGroupItem(groupIndex).getChildCount() <= 0) {
+            return false;
+        }
         if (!isGroupExpand(groupIndex)) {
             mExpandGroupList.add(groupIndex);
             final int position = getPosition(groupIndex);
@@ -103,7 +102,11 @@ public abstract class ExpandableRecyclerViewAdapter
 
     @Override
     public final int getItemCount() {
-        return getPosition(getGroupCount());
+        int result = getGroupCount();
+        for (Integer integer : mExpandGroupList) {
+            result += getGroupItem(integer).getChildCount();
+        }
+        return result;
     }
 
     public final int getPosition(int groupIndex) {
@@ -151,19 +154,22 @@ public abstract class ExpandableRecyclerViewAdapter
     @Override
     public final void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         if (holder.getItemViewType() == TYPE_CHILD) {
-            bindChildViewHolder(holder, position);
+            final int[] childCoord = translateToDoubleIndex(position);
+            bindChildViewHolder((ChildViewHolder) holder, getGroupItem(childCoord[0]), childCoord[0], childCoord[1]);
         } else {
-            bindGroupViewHolder(holder, position);
+            bindGroupViewHolder((GroupViewHolder) holder, translateToDoubleIndex(position)[0]);
         }
     }
 
-    private void bindGroupViewHolder(final RecyclerView.ViewHolder holder, int position) {
-        final int groupIndex = translateToDoubleIndex(position)[0];
+    private void bindGroupViewHolder(final GroupViewHolder holder, final int groupIndex) {
         final GroupItem groupItem = getGroupItem(groupIndex);
-        onBindGroupViewHolder((GroupViewHolder) holder, groupItem, isGroupExpand(groupIndex));
+        onBindGroupViewHolder(holder, groupItem, isGroupExpand(groupIndex));
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (groupItem.getChildCount() <= 0) {
+                    return;
+                }
                 final boolean isExpand = mExpandGroupList.contains(groupIndex);
                 if (mListener == null || !mListener.onGroupClicked(groupItem, isExpand)) {
                     final int adapterPosition = holder.getAdapterPosition();
@@ -180,15 +186,13 @@ public abstract class ExpandableRecyclerViewAdapter
         });
     }
 
-    private void bindChildViewHolder(RecyclerView.ViewHolder holder, int position) {
-        final int[] childCoord = translateToDoubleIndex(position);
-        final GroupItem groupItem = getGroupItem(childCoord[0]);
-        onBindChildViewHolder((ChildViewHolder) holder, groupItem, childCoord[1]);
+    private void bindChildViewHolder(ChildViewHolder holder, final GroupItem groupItem, final int groupIndex, final int childIndex) {
+        onBindChildViewHolder(holder, groupItem, childIndex);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (mListener != null) {
-                    mListener.onChildClicked(groupItem, childCoord[1]);
+                    mListener.onChildClicked(groupItem, childIndex);
                 }
             }
         });
@@ -200,7 +204,7 @@ public abstract class ExpandableRecyclerViewAdapter
      * @param position adapterPosition
      * @return int[]{groupIndex,childIndex}
      */
-    private int[] translateToDoubleIndex(int position) {
+    private final int[] translateToDoubleIndex(int position) {
         final int[] result = new int[2];
         final int groupCount = getGroupCount();
         int positionCursor = 0;
