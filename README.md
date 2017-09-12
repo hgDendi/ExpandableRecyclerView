@@ -63,7 +63,7 @@ public class SampleAdapter extends ExpandableRecyclerViewAdapter
 
 Relating classes:
 
-```
+```java
 class GroupVH extends RecyclerView.ViewHolder {
     //customize
 }
