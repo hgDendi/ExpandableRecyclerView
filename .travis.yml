@@ -9,3 +9,10 @@ android:
 
     # The SDK version used to compile your project
     - android-26
+    - extra-android-m2repository
+    - extra-android-support
+before_install:
+  - chmod +x gradlew
+
+script:  
+  - ./gradlew assembleRelease
