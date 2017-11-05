@@ -7,12 +7,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.hgdendi.expandablerecycleradapter.ExpandableRecyclerViewAdapter;
+import com.hgdendi.expandablerecycleradapter.BaseExpandableRecyclerViewAdapter;
 
 import java.util.List;
 
-public class SampleAdapter extends ExpandableRecyclerViewAdapter
-        <SampleGroupBean, SampleAdapter.GroupVH, SampleAdapter.ChildVH> {
+public class SampleAdapter extends BaseExpandableRecyclerViewAdapter<SampleGroupBean, SampleAdapter.GroupVH, SampleAdapter.ChildVH> {
 
     private List<SampleGroupBean> mList;
 

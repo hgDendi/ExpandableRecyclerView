@@ -1,5 +1,5 @@
 /**
- * CheckableExpandableRecyclerViewAdapter
+ * BaseCheckableExpandableRecyclerViewAdapter
  * https://github.com/hgDendi/ExpandableRecyclerView
  * <p>
  * Copyright (c) 2017 hg.dendi
@@ -22,21 +22,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-public abstract class CheckableExpandableRecyclerViewAdapter
-        <GroupItem extends CheckableExpandableRecyclerViewAdapter.CheckableGroupItem<ChildItem>,
+public abstract class BaseCheckableExpandableRecyclerViewAdapter
+        <GroupItem extends BaseCheckableExpandableRecyclerViewAdapter.CheckableGroupItem<ChildItem>,
                 ChildItem,
-                GroupViewHolder extends CheckableExpandableRecyclerViewAdapter.CheckableGroupVH,
-                ChildViewHolder extends CheckableExpandableRecyclerViewAdapter.CheckableChildVH>
-        extends ExpandableRecyclerViewAdapter<GroupItem, GroupViewHolder, ChildViewHolder> {
+                GroupViewHolder extends BaseCheckableExpandableRecyclerViewAdapter.BaseCheckableGroupViewHolder,
+                ChildViewHolder extends BaseCheckableExpandableRecyclerViewAdapter.BaseCheckableChildViewHolder>
+        extends BaseExpandableRecyclerViewAdapter<GroupItem, GroupViewHolder, ChildViewHolder> {
 
-    private static final String TAG = CheckableExpandableRecyclerViewAdapter.class.getSimpleName();
+    private static final String TAG = BaseCheckableExpandableRecyclerViewAdapter.class.getSimpleName();
 
     private final Object PAYLOAD_CHECKMODE = this;
     public static final int CHECK_MODE_NONE = 0;
     public static final int CHECK_MODE_PARTIAL = CHECK_MODE_NONE + 1;
     public static final int CHECK_MODE_ALL = CHECK_MODE_NONE + 2;
 
-    private final Set<CheckedItem<GroupItem, ChildItem>> mCheckedList = new HashSet<>();
+    private final Set<CheckedItem<GroupItem, ChildItem>> mCheckedSet = new HashSet<>();
     private CheckStatusChangeListener<GroupItem, ChildItem> mOnCheckStatusChangeListener;
 
     /**
@@ -46,32 +46,38 @@ public abstract class CheckableExpandableRecyclerViewAdapter
      */
     private int mMaxCheckedNum;
 
-    public CheckableExpandableRecyclerViewAdapter(int maxCheckedNum) {
+    public BaseCheckableExpandableRecyclerViewAdapter(int maxCheckedNum) {
+        if (maxCheckedNum <= 0) {
+            throw new IllegalArgumentException("invalid maxCheckedNum " + maxCheckedNum);
+        }
         mMaxCheckedNum = maxCheckedNum;
+        registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onChanged() {
+                // after notifyDataSetChange(),clear outdated list
+                mCheckedSet.clear();
+            }
+        });
     }
 
-    /******************
-     * external interface
-     ******************/
-
-    public final Set<CheckedItem<GroupItem, ChildItem>> getCheckedList() {
-        return mCheckedList;
+    public final Set<CheckedItem<GroupItem, ChildItem>> getCheckedSet() {
+        return mCheckedSet;
     }
 
     public final int getSelectedCount() {
-        return mCheckedList.size();
+        return mCheckedSet.size();
     }
 
     public final void setOnCheckStatusChangeListener(CheckStatusChangeListener<GroupItem, ChildItem> onCheckStatusChangeListener) {
         mOnCheckStatusChangeListener = onCheckStatusChangeListener;
     }
 
-    public final void setCheckedList(List<CheckedItem> checkedList) {
+    public final void setCheckedSet(List<CheckedItem> checkedSet) {
         clearCheckedListAndUpdateUI();
-        if (checkedList == null || checkedList.size() <= 0) {
+        if (checkedSet == null || checkedSet.size() <= 0) {
             return;
         }
-        for (CheckedItem checkedItem : checkedList) {
+        for (CheckedItem checkedItem : checkedSet) {
             addToCheckedList(checkedItem);
         }
     }
@@ -193,6 +199,7 @@ public abstract class CheckableExpandableRecyclerViewAdapter
                     selectAllInGroup(holder, groupItem, groupIndex, true);
                     break;
                 case CHECK_MODE_ALL:
+                default:
                     selectAllInGroup(holder, groupItem, groupIndex, false);
                     break;
             }
@@ -277,7 +284,7 @@ public abstract class CheckableExpandableRecyclerViewAdapter
     }
 
     private boolean isItemSelected(GroupItem groupItem) {
-        for (CheckedItem checkedItem : mCheckedList) {
+        for (CheckedItem checkedItem : mCheckedSet) {
             if (checkedItem.getCheckedItem().equals(groupItem)) {
                 return true;
             }
@@ -286,7 +293,7 @@ public abstract class CheckableExpandableRecyclerViewAdapter
     }
 
     private boolean isItemSelected(ChildItem childItem) {
-        for (CheckedItem checkedItem : mCheckedList) {
+        for (CheckedItem checkedItem : mCheckedSet) {
             if (checkedItem.getCheckedItem().equals(childItem)) {
                 return true;
             }
@@ -302,19 +309,19 @@ public abstract class CheckableExpandableRecyclerViewAdapter
         return addToCheckedList(new CheckedItem<>(groupItem, childItem));
     }
 
-    private boolean addToCheckedList(CheckedItem checkedItem) {
+    private boolean addToCheckedList(CheckedItem<GroupItem,ChildItem> checkedItem) {
         if (mMaxCheckedNum == 1) {
             clearCheckedListAndUpdateUI();
-        } else if (mMaxCheckedNum <= mCheckedList.size()) {
+        } else if (mMaxCheckedNum <= mCheckedSet.size()) {
             return false;
         }
-        return mCheckedList.add(checkedItem);
+        return mCheckedSet.add(checkedItem);
     }
 
     private void clearCheckedListAndUpdateUI() {
-        Iterator<CheckedItem<GroupItem, ChildItem>> iter = mCheckedList.iterator();
+        Iterator<CheckedItem<GroupItem, ChildItem>> iter = mCheckedSet.iterator();
         while (iter.hasNext()) {
-            final CheckedItem checkedItem = iter.next();
+            final CheckedItem<GroupItem,ChildItem> checkedItem = iter.next();
             final int[] coord = getCoordFromCheckedItem(checkedItem);
             final GroupItem originalGroupItem = getGroupItem(coord[0]);
             final int originalGroupCheckedStatus = getGroupCheckedMode(originalGroupItem);
@@ -348,21 +355,21 @@ public abstract class CheckableExpandableRecyclerViewAdapter
     }
 
     private boolean removeFromCheckedList(GroupItem groupItem, ChildItem childItem) {
-        return mCheckedList.remove(new CheckedItem<>(groupItem, childItem));
+        return mCheckedSet.remove(new CheckedItem<>(groupItem, childItem));
     }
 
     /******************
      * interface
      ******************/
 
-    public abstract static class CheckableGroupVH extends GroupViewHolderTemplate implements Selectable {
-        public CheckableGroupVH(View itemView) {
+    public abstract static class BaseCheckableGroupViewHolder extends BaseGroupViewHolder implements Selectable {
+        public BaseCheckableGroupViewHolder(View itemView) {
             super(itemView);
         }
     }
 
-    public abstract static class CheckableChildVH extends RecyclerView.ViewHolder implements Selectable {
-        public CheckableChildVH(View itemView) {
+    public abstract static class BaseCheckableChildViewHolder extends RecyclerView.ViewHolder implements Selectable {
+        public BaseCheckableChildViewHolder(View itemView) {
             super(itemView);
         }
     }
@@ -392,6 +399,11 @@ public abstract class CheckableExpandableRecyclerViewAdapter
     }
 
     public interface CheckableGroupItem<ChildItem> extends GroupNode {
+        /**
+         * get children list
+         *
+         * @return
+         */
         List<ChildItem> getChildren();
     }
 
@@ -422,12 +434,18 @@ public abstract class CheckableExpandableRecyclerViewAdapter
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
 
             CheckedItem that = (CheckedItem) o;
 
-            if (!groupItem.equals(that.groupItem)) return false;
+            if (!groupItem.equals(that.groupItem)) {
+                return false;
+            }
             return childItem != null ? childItem.equals(that.childItem) : that.childItem == null;
 
         }
@@ -443,13 +461,13 @@ public abstract class CheckableExpandableRecyclerViewAdapter
 
     /**
      * Intercept of mode switch
-     *
+     * <p>
      * returns true means intercept this mode switch
      *
      * @param <GroupItem>
      * @param <ChildItem>
      */
-    public interface CheckStatusChangeListener<GroupItem extends CheckableExpandableRecyclerViewAdapter.CheckableGroupItem<ChildItem>, ChildItem> {
+    public interface CheckStatusChangeListener<GroupItem extends BaseCheckableExpandableRecyclerViewAdapter.CheckableGroupItem<ChildItem>, ChildItem> {
 
         boolean onInterceptGroupCheckStatusChange(GroupItem groupItem, int groupIndex, boolean targetStatus);
 

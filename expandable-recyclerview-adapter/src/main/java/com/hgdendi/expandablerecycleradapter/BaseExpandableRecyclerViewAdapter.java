@@ -1,5 +1,5 @@
 /**
- * ExpandableRecyclerViewAdapter
+ * BaseExpandableRecyclerViewAdapter
  * https://github.com/hgDendi/ExpandableRecyclerView
  * <p>
  * Copyright (c) 2017 hg.dendi
@@ -13,74 +13,130 @@
 
 package com.hgdendi.expandablerecycleradapter;
 
+import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
 
-public abstract class ExpandableRecyclerViewAdapter
-        <GroupItem extends ExpandableRecyclerViewAdapter.GroupNode,
-                GroupViewHolder extends ExpandableRecyclerViewAdapter.GroupViewHolderTemplate,
+public abstract class BaseExpandableRecyclerViewAdapter
+        <GroupItem extends BaseExpandableRecyclerViewAdapter.GroupNode,
+                GroupViewHolder extends BaseExpandableRecyclerViewAdapter.BaseGroupViewHolder,
                 ChildViewHolder extends RecyclerView.ViewHolder>
         extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-    private static final String TAG = ExpandableRecyclerViewAdapter.class.getSimpleName();
+    private static final String TAG = BaseExpandableRecyclerViewAdapter.class.getSimpleName();
 
     private static final int TYPE_GROUP = 0;
     private static final int TYPE_CHILD = 1;
     private static final int TYPE_EMPTY = ViewProducer.VIEW_TYPE_EMPTY;
     private static final int TYPE_HEADER = ViewProducer.VIEW_TYPE_HEADER;
 
-    protected Set<Integer> mExpandGroupList;
+    protected Set<GroupItem> mExpandGroupSet;
     private boolean mIsEmpty;
     private ExpandableRecyclerViewOnClickListener<GroupItem> mListener;
     private ViewProducer mEmptyViewProducer;
     private ViewProducer mHeaderViewProducer;
 
-    public ExpandableRecyclerViewAdapter() {
-        mExpandGroupList = new TreeSet<>();
+    public BaseExpandableRecyclerViewAdapter() {
+        mExpandGroupSet = new TreeSet<>();
         registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
             public void onChanged() {
                 // after notifyDataSetChange(),clear outdated list
-                mExpandGroupList.clear();
+                List<GroupItem> retainItem = new ArrayList<>();
+                for (int i = 0; i < getGroupCount(); i++) {
+                    GroupItem groupItem = getGroupItem(i);
+                    if (mExpandGroupSet.contains(groupItem)) {
+                        retainItem.add(groupItem);
+                    }
+                }
+                mExpandGroupSet.clear();
+                mExpandGroupSet.addAll(retainItem);
             }
         });
     }
 
-    /******************
-     * abstract methods
-     ******************/
-
+    /**
+     * get group count
+     *
+     * @return group count
+     */
     abstract public int getGroupCount();
 
-    abstract public GroupItem getGroupItem(int position);
+    /**
+     * get groupItem related to GroupCount
+     *
+     * @param groupIndex the index of group item in group list
+     * @return related GroupItem
+     */
+    abstract public GroupItem getGroupItem(int groupIndex);
 
+    /**
+     * create {@link GroupViewHolder} for group item
+     *
+     * @param parent
+     * @return
+     */
     abstract public GroupViewHolder onCreateGroupViewHolder(ViewGroup parent);
 
+    /**
+     * create {@link ChildViewHolder} for child item
+     *
+     * @param parent
+     * @return
+     */
     abstract public ChildViewHolder onCreateChildViewHolder(ViewGroup parent);
 
+    /**
+     * bind {@link GroupViewHolder}
+     *
+     * @param holder
+     * @param groupItem
+     * @param isExpand
+     */
     abstract public void onBindGroupViewHolder(GroupViewHolder holder, GroupItem groupItem, boolean isExpand);
 
+    /**
+     * bind {@link GroupViewHolder} with payload , used to invalidate partially
+     *
+     * @param holder
+     * @param groupItem
+     * @param isExpand
+     * @param payload
+     */
     protected void onBindGroupViewHolder(GroupViewHolder holder, GroupItem groupItem, boolean isExpand, List<Object> payload) {
         onBindGroupViewHolder(holder, groupItem, isExpand);
     }
 
+    /**
+     * bind {@link ChildViewHolder}
+     *
+     * @param holder
+     * @param groupItem
+     * @param childIndex
+     */
     abstract public void onBindChildViewHolder(ChildViewHolder holder, GroupItem groupItem, int childIndex);
 
+    /**
+     * bind {@link ChildViewHolder} with payload , used to invalidate partially
+     *
+     * @param holder
+     * @param groupItem
+     * @param childIndex
+     * @param payload
+     */
     protected void onBindChildViewHolder(ChildViewHolder holder, GroupItem groupItem, int childIndex, List<Object> payload) {
         onBindChildViewHolder(holder, groupItem, childIndex);
     }
 
-    /******************
-     * external interface
-     ******************/
 
     public void setEmptyViewProducer(ViewProducer emptyViewProducer) {
         if (mEmptyViewProducer != emptyViewProducer) {
@@ -103,14 +159,15 @@ public abstract class ExpandableRecyclerViewAdapter
     }
 
     public final boolean isGroupExpand(int groupIndex) {
-        return mExpandGroupList.contains(groupIndex);
+        return mExpandGroupSet.contains(getGroupItem(groupIndex));
     }
 
     public final boolean expandGroup(int groupIndex) {
-        if (getGroupItem(groupIndex).isExpandable() && !isGroupExpand(groupIndex)) {
-            mExpandGroupList.add(groupIndex);
+        GroupItem groupItem = getGroupItem(groupIndex);
+        if (groupItem.isExpandable() && !isGroupExpand(groupIndex)) {
+            mExpandGroupSet.add(groupItem);
             final int position = getPosition(groupIndex);
-            notifyItemRangeInserted(position + 1, getGroupItem(groupIndex).getChildCount());
+            notifyItemRangeInserted(position + 1, groupItem.getChildCount());
             notifyItemChanged(position);
             return true;
         }
@@ -118,21 +175,21 @@ public abstract class ExpandableRecyclerViewAdapter
     }
 
     public final void foldAll() {
-        Iterator<Integer> iter = mExpandGroupList.iterator();
+        Iterator<GroupItem> iter = mExpandGroupSet.iterator();
         while (iter.hasNext()) {
-            Integer groupIndex = iter.next();
-            final int position = getPosition(groupIndex);
-            notifyItemRangeRemoved(position + 1, getGroupItem(groupIndex).getChildCount());
+            GroupItem groupItem = iter.next();
+            final int position = getPosition(getGroupIndex(groupItem));
+            notifyItemRangeRemoved(position + 1, groupItem.getChildCount());
             notifyItemChanged(position);
             iter.remove();
         }
     }
 
     public final boolean foldGroup(int groupIndex) {
-        if (isGroupExpand(groupIndex)) {
-            mExpandGroupList.remove(groupIndex);
+        GroupItem groupItem = getGroupItem(groupIndex);
+        if (mExpandGroupSet.remove(groupItem)) {
             final int position = getPosition(groupIndex);
-            notifyItemRangeRemoved(position + 1, getGroupItem(groupIndex).getChildCount());
+            notifyItemRangeRemoved(position + 1, groupItem.getChildCount());
             notifyItemChanged(position);
             return true;
         }
@@ -147,12 +204,12 @@ public abstract class ExpandableRecyclerViewAdapter
             return mHeaderViewProducer == null ? 1 : 2;
         }
         mIsEmpty = false;
-        for (Integer integer : mExpandGroupList) {
-            if (integer >= getGroupCount()) {
-                Log.e(TAG, "invalid index in expandgroupList : " + integer);
+        for (GroupItem groupItem : mExpandGroupSet) {
+            if (getGroupIndex(groupItem) >= 0) {
+                Log.e(TAG, "invalid index in expandgroupList : " + groupItem);
                 continue;
             }
-            result += getGroupItem(integer).getChildCount();
+            result += groupItem.getChildCount();
         }
         if (mHeaderViewProducer != null) {
             result++;
@@ -162,9 +219,9 @@ public abstract class ExpandableRecyclerViewAdapter
 
     public final int getPosition(int groupIndex) {
         int result = groupIndex;
-        for (Integer integer : mExpandGroupList) {
-            if (integer < groupIndex) {
-                result += getGroupItem(integer).getChildCount();
+        for (GroupItem groupItem : mExpandGroupSet) {
+            if (getGroupIndex(groupItem) >= 0) {
+                result += groupItem.getChildCount();
             }
         }
         if (mHeaderViewProducer != null) {
@@ -173,11 +230,20 @@ public abstract class ExpandableRecyclerViewAdapter
         return result;
     }
 
-    public final int getGroupPosition(int position) {
-        if (mIsEmpty || position < 0 || (mHeaderViewProducer != null && position == 0)) {
+    public final int getGroupPosition(int groupIndex) {
+        if (mIsEmpty || groupIndex < 0 || (mHeaderViewProducer != null && groupIndex == 0)) {
             return -1;
         }
-        return translateToDoubleIndex(position)[0];
+        return translateToDoubleIndex(groupIndex)[0];
+    }
+
+    public final int getGroupIndex(@NonNull GroupItem groupItem) {
+        for (int i = 0; i < getGroupCount(); i++) {
+            if (groupItem.equals(getGroupItem(i))) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /******************
@@ -199,8 +265,9 @@ public abstract class ExpandableRecyclerViewAdapter
             if (position < firstValidIndex) {
                 return TYPE_GROUP;
             }
-            if (mExpandGroupList.contains(i)) {
-                position -= getGroupItem(i).getChildCount();
+            GroupItem groupItem = getGroupItem(i);
+            if (mExpandGroupSet.contains(groupItem)) {
+                position -= groupItem.getChildCount();
                 if (position < firstValidIndex) {
                     return TYPE_CHILD;
                 }
@@ -214,9 +281,9 @@ public abstract class ExpandableRecyclerViewAdapter
     public final RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         switch (viewType) {
             case TYPE_EMPTY:
-                return mEmptyViewProducer.onCreateEmptyViewHolder(parent);
+                return mEmptyViewProducer.onCreateViewHolder(parent);
             case TYPE_HEADER:
-                return mHeaderViewProducer.onCreateEmptyViewHolder(parent);
+                return mHeaderViewProducer.onCreateViewHolder(parent);
             case TYPE_CHILD:
                 return onCreateChildViewHolder(parent);
             case TYPE_GROUP:
@@ -234,10 +301,10 @@ public abstract class ExpandableRecyclerViewAdapter
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position, List<Object> payloads) {
         switch (holder.getItemViewType()) {
             case TYPE_EMPTY:
-                mEmptyViewProducer.onBindEmptyViewHolder(holder);
+                mEmptyViewProducer.onBindViewHolder(holder);
                 break;
             case TYPE_HEADER:
-                mHeaderViewProducer.onBindEmptyViewHolder(holder);
+                mHeaderViewProducer.onBindViewHolder(holder);
                 break;
             case TYPE_CHILD:
                 final int[] childCoord = translateToDoubleIndex(position);
@@ -273,17 +340,17 @@ public abstract class ExpandableRecyclerViewAdapter
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    final boolean isExpand = mExpandGroupList.contains(groupIndex);
-                    if (mListener == null || !mListener.onGroupClicked(groupItem, isExpand)) {
+                    final boolean isExpand = mExpandGroupSet.contains(groupItem);
+                    if (mListener == null || !mListener.onInterceptGroupExpandEvent(groupItem, isExpand)) {
                         final int adapterPosition = holder.getAdapterPosition();
                         if (isExpand) {
-                            mExpandGroupList.remove(groupIndex);
+                            mExpandGroupSet.remove(groupItem);
                             notifyItemRangeRemoved(adapterPosition + 1, groupItem.getChildCount());
                         } else {
-                            mExpandGroupList.add(groupIndex);
+                            mExpandGroupSet.add(groupItem);
                             notifyItemRangeInserted(adapterPosition + 1, groupItem.getChildCount());
                         }
-                        holder.onFoldUnfold(!isExpand, ExpandableRecyclerViewAdapter.this);
+                        holder.onExpandStatusChanged(BaseExpandableRecyclerViewAdapter.this, !isExpand);
                     }
                 }
             });
@@ -323,8 +390,9 @@ public abstract class ExpandableRecyclerViewAdapter
                 result[1] = -1;
                 break;
             }
-            if (mExpandGroupList.contains(groupCursor)) {
-                final int childCount = getGroupItem(groupCursor).getChildCount();
+            GroupItem groupItem = getGroupItem(groupCursor);
+            if (mExpandGroupSet.contains(groupItem)) {
+                final int childCount = groupItem.getChildCount();
                 final int offset = position - positionCursor;
                 if (childCount >= offset) {
                     result[0] = groupCursor;
@@ -343,6 +411,11 @@ public abstract class ExpandableRecyclerViewAdapter
      ******************/
 
     public interface GroupNode {
+        /**
+         * get num of children
+         *
+         * @return
+         */
         int getChildCount();
 
         /**
@@ -353,19 +426,20 @@ public abstract class ExpandableRecyclerViewAdapter
         boolean isExpandable();
     }
 
-    public static abstract class GroupViewHolderTemplate extends RecyclerView.ViewHolder {
-        public GroupViewHolderTemplate(View itemView) {
+    public static abstract class BaseGroupViewHolder extends RecyclerView.ViewHolder {
+        public BaseGroupViewHolder(View itemView) {
             super(itemView);
         }
 
         /**
          * optimize for partial invalidate,
-         * when switching fold status
+         * when switching fold status.
+         * Default implementation is update the whole {@link android.support.v7.widget.RecyclerView.ViewHolder#itemView}.
          *
-         * @param isExpanding
          * @param relatedAdapter
+         * @param isExpanding
          */
-        protected void onFoldUnfold(boolean isExpanding, RecyclerView.Adapter relatedAdapter) {
+        protected void onExpandStatusChanged(RecyclerView.Adapter relatedAdapter, boolean isExpanding) {
             relatedAdapter.notifyItemChanged(getAdapterPosition());
         }
     }
@@ -373,17 +447,32 @@ public abstract class ExpandableRecyclerViewAdapter
 
     public interface ExpandableRecyclerViewOnClickListener<GroupBean extends GroupNode> {
 
+        /**
+         * called when an unexpandable group item is clicked
+         * @param groupItem
+         */
         void onGroupClicked(GroupBean groupItem);
 
+        /**
+         * called when group item is long clicked
+         * @param groupItem
+         * @return
+         */
         boolean onGroupLongClicked(GroupBean groupItem);
 
         /**
+         * called when an expandable group item is clicked
          * @param groupItem
          * @param isExpand
          * @return whether intercept the click event
          */
-        boolean onGroupClicked(GroupBean groupItem, boolean isExpand);
+        boolean onInterceptGroupExpandEvent(GroupBean groupItem, boolean isExpand);
 
+        /**
+         * called when child is clicked
+         * @param groupItem
+         * @param childIndex
+         */
         void onChildClicked(GroupBean groupItem, int childIndex);
     }
 }

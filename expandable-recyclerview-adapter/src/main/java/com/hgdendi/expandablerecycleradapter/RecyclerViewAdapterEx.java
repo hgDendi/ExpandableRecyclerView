@@ -96,9 +96,9 @@ public abstract class RecyclerViewAdapterEx<VH extends RecyclerView.ViewHolder> 
     @Override
     public final RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (viewType == TYPE_EMPTY) {
-            return mEmptyViewProducer.onCreateEmptyViewHolder(parent);
+            return mEmptyViewProducer.onCreateViewHolder(parent);
         } else if (viewType == TYPE_HEADER) {
-            return mHeaderViewProducer.onCreateEmptyViewHolder(parent);
+            return mHeaderViewProducer.onCreateViewHolder(parent);
         } else {
             return onCreateCustomizeViewHolder(parent, viewType);
         }
@@ -107,9 +107,9 @@ public abstract class RecyclerViewAdapterEx<VH extends RecyclerView.ViewHolder> 
     @Override
     public final void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
         if (holder.getItemViewType() == TYPE_EMPTY) {
-            mEmptyViewProducer.onBindEmptyViewHolder(holder);
+            mEmptyViewProducer.onBindViewHolder(holder);
         } else if (holder.getItemViewType() == TYPE_HEADER) {
-            mHeaderViewProducer.onBindEmptyViewHolder(holder);
+            mHeaderViewProducer.onBindViewHolder(holder);
         } else {
             if (mHeaderViewProducer != null) {
                 position--;
@@ -121,9 +121,9 @@ public abstract class RecyclerViewAdapterEx<VH extends RecyclerView.ViewHolder> 
     @Override
     public final void onBindViewHolder(RecyclerView.ViewHolder holder, int position, List<Object> payloads) {
         if (holder.getItemViewType() == TYPE_EMPTY) {
-            mEmptyViewProducer.onBindEmptyViewHolder(holder);
+            mEmptyViewProducer.onBindViewHolder(holder);
         } else if (holder.getItemViewType() == TYPE_HEADER) {
-            mHeaderViewProducer.onBindEmptyViewHolder(holder);
+            mHeaderViewProducer.onBindViewHolder(holder);
         } else {
             if (mHeaderViewProducer != null) {
                 position--;

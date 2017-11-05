@@ -2,11 +2,11 @@ package com.hgdendi.expandablerecyclerview;
 
 import android.support.annotation.NonNull;
 
-import com.hgdendi.expandablerecycleradapter.ExpandableRecyclerViewAdapter;
+import com.hgdendi.expandablerecycleradapter.BaseExpandableRecyclerViewAdapter;
 
 import java.util.List;
 
-class SampleGroupBean implements ExpandableRecyclerViewAdapter.GroupNode {
+class SampleGroupBean implements BaseExpandableRecyclerViewAdapter.GroupNode {
 
     private List<SampleChildBean> mList;
     private String mName;
