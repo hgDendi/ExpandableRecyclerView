@@ -23,11 +23,11 @@ import java.util.List;
 import java.util.Set;
 
 public abstract class BaseCheckableExpandableRecyclerViewAdapter
-        <GroupItem extends BaseCheckableExpandableRecyclerViewAdapter.CheckableGroupItem<ChildItem>,
-                ChildItem,
+        <GroupBean extends BaseCheckableExpandableRecyclerViewAdapter.CheckableGroupItem<ChildBean>,
+                ChildBean,
                 GroupViewHolder extends BaseCheckableExpandableRecyclerViewAdapter.BaseCheckableGroupViewHolder,
                 ChildViewHolder extends BaseCheckableExpandableRecyclerViewAdapter.BaseCheckableChildViewHolder>
-        extends BaseExpandableRecyclerViewAdapter<GroupItem, ChildItem, GroupViewHolder, ChildViewHolder> {
+        extends BaseExpandableRecyclerViewAdapter<GroupBean, ChildBean, GroupViewHolder, ChildViewHolder> {
 
     private static final String TAG = BaseCheckableExpandableRecyclerViewAdapter.class.getSimpleName();
 
@@ -36,8 +36,8 @@ public abstract class BaseCheckableExpandableRecyclerViewAdapter
     public static final int CHECK_MODE_PARTIAL = CHECK_MODE_NONE + 1;
     public static final int CHECK_MODE_ALL = CHECK_MODE_NONE + 2;
 
-    private final Set<CheckedItem<GroupItem, ChildItem>> mCheckedSet = new HashSet<>();
-    private CheckStatusChangeListener<GroupItem, ChildItem> mOnCheckStatusChangeListener;
+    private final Set<CheckedItem<GroupBean, ChildBean>> mCheckedSet = new HashSet<>();
+    private CheckStatusChangeListener<GroupBean, ChildBean> mOnCheckStatusChangeListener;
 
     /**
      * max num of items to be selected at the same time
@@ -60,7 +60,7 @@ public abstract class BaseCheckableExpandableRecyclerViewAdapter
         });
     }
 
-    public final Set<CheckedItem<GroupItem, ChildItem>> getCheckedSet() {
+    public final Set<CheckedItem<GroupBean, ChildBean>> getCheckedSet() {
         return mCheckedSet;
     }
 
@@ -68,28 +68,28 @@ public abstract class BaseCheckableExpandableRecyclerViewAdapter
         return mCheckedSet.size();
     }
 
-    public final void setOnCheckStatusChangeListener(CheckStatusChangeListener<GroupItem, ChildItem> onCheckStatusChangeListener) {
+    public final void setOnCheckStatusChangeListener(CheckStatusChangeListener<GroupBean, ChildBean> onCheckStatusChangeListener) {
         mOnCheckStatusChangeListener = onCheckStatusChangeListener;
     }
 
-    public final void setCheckedSet(List<CheckedItem> checkedSet) {
+    public final void setCheckedSet(List<CheckedItem<GroupBean, ChildBean>> checkedSet) {
         clearCheckedListAndUpdateUI();
         if (checkedSet == null || checkedSet.size() <= 0) {
             return;
         }
-        for (CheckedItem checkedItem : checkedSet) {
+        for (CheckedItem<GroupBean, ChildBean> checkedItem : checkedSet) {
             addToCheckedList(checkedItem);
         }
     }
 
     @Override
-    public void onBindGroupViewHolder(final GroupViewHolder groupViewHolder, final GroupItem groupItem, boolean isExpand) {
+    public void onBindGroupViewHolder(final GroupViewHolder groupViewHolder, final GroupBean groupBean, boolean isExpand) {
         if (groupViewHolder.getCheckableRegion() != null) {
             groupViewHolder.getCheckableRegion().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     onGroupChecked(
-                            groupItem,
+                            groupBean,
                             groupViewHolder,
                             translateToDoubleIndex(groupViewHolder.getAdapterPosition())[0]);
                 }
@@ -98,20 +98,20 @@ public abstract class BaseCheckableExpandableRecyclerViewAdapter
     }
 
     @Override
-    protected void onBindGroupViewHolder(GroupViewHolder groupViewHolder, GroupItem groupItem, boolean isExpand, List<Object> payload) {
+    protected void onBindGroupViewHolder(GroupViewHolder groupViewHolder, GroupBean groupBean, boolean isExpand, List<Object> payload) {
         if (payload != null && payload.size() != 0) {
-            if (payload.remove(PAYLOAD_CHECKMODE)) {
-                groupViewHolder.setCheckMode(getGroupCheckedMode(groupItem));
+            if (payload.contains(PAYLOAD_CHECKMODE)) {
+                groupViewHolder.setCheckMode(getGroupCheckedMode(groupBean));
             }
             return;
         }
 
-        onBindGroupViewHolder(groupViewHolder, groupItem, isExpand);
+        onBindGroupViewHolder(groupViewHolder, groupBean, isExpand);
     }
 
     @Override
-    public void onBindChildViewHolder(final ChildViewHolder holder, final GroupItem groupBean, final ChildItem childItem) {
-        holder.setCheckMode(getChildCheckedMode(childItem));
+    public void onBindChildViewHolder(final ChildViewHolder holder, final GroupBean groupBean, final ChildBean childBean) {
+        holder.setCheckMode(getChildCheckedMode(childBean));
         if (holder.getCheckableRegion() != null) {
             holder.getCheckableRegion().setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -119,54 +119,50 @@ public abstract class BaseCheckableExpandableRecyclerViewAdapter
                     onChildChecked(
                             holder,
                             groupBean,
-                            childItem);
+                            childBean);
                 }
             });
         }
     }
 
     @Override
-    protected void onBindChildViewHolder(ChildViewHolder holder, GroupItem groupBean, ChildItem childItem, List<Object> payload) {
+    protected void onBindChildViewHolder(ChildViewHolder holder, GroupBean groupBean, ChildBean childBean, List<Object> payload) {
         if (payload != null && payload.size() != 0) {
-            if (payload.remove(PAYLOAD_CHECKMODE)) {
-                holder.setCheckMode(getChildCheckedMode(childItem));
+            if (payload.contains(PAYLOAD_CHECKMODE)) {
+                holder.setCheckMode(getChildCheckedMode(childBean));
             }
             return;
         }
-        onBindChildViewHolder(holder, groupBean, childItem);
+        onBindChildViewHolder(holder, groupBean, childBean);
     }
 
     @Override
-    protected void bindChildViewHolder(final ChildViewHolder holder, final GroupItem groupBean, final ChildItem childItem, List<Object> payload) {
-        super.bindChildViewHolder(holder, groupBean, childItem, payload);
-        holder.setCheckMode(getChildCheckedMode(childItem));
+    protected void bindChildViewHolder(final ChildViewHolder holder, final GroupBean groupBean, final ChildBean childBean, List<Object> payload) {
+        super.bindChildViewHolder(holder, groupBean, childBean, payload);
+        holder.setCheckMode(getChildCheckedMode(childBean));
         if (holder.getCheckableRegion() != null) {
             holder.getCheckableRegion().setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    onChildChecked(holder, groupBean, childItem);
+                    onChildChecked(holder, groupBean, childBean);
                 }
             });
         }
     }
 
-    /******************
-     * concerning check
-     ******************/
-
-    private int getGroupCheckedMode(GroupItem groupItem) {
-        if (!groupItem.isExpandable()) {
-            return isItemSelected(groupItem) ? CHECK_MODE_ALL : CHECK_MODE_NONE;
+    private int getGroupCheckedMode(GroupBean groupBean) {
+        if (!groupBean.isExpandable()) {
+            return isItemSelected(groupBean) ? CHECK_MODE_ALL : CHECK_MODE_NONE;
         } else {
             int checkedCount = 0;
-            for (ChildItem childItem : groupItem.getChildren()) {
-                if (isItemSelected(childItem)) {
+            for (ChildBean childBean : groupBean.getChildren()) {
+                if (isItemSelected(childBean)) {
                     checkedCount++;
                 }
             }
             if (checkedCount == 0) {
                 return CHECK_MODE_NONE;
-            } else if (checkedCount == groupItem.getChildCount()) {
+            } else if (checkedCount == groupBean.getChildCount()) {
                 return CHECK_MODE_ALL;
             } else {
                 return CHECK_MODE_PARTIAL;
@@ -174,133 +170,133 @@ public abstract class BaseCheckableExpandableRecyclerViewAdapter
         }
     }
 
-    private int getChildCheckedMode(ChildItem childItem) {
-        return isItemSelected(childItem) ? CHECK_MODE_ALL : CHECK_MODE_NONE;
+    private int getChildCheckedMode(ChildBean childBean) {
+        return isItemSelected(childBean) ? CHECK_MODE_ALL : CHECK_MODE_NONE;
     }
 
-    private final void onGroupChecked(GroupItem groupItem, GroupViewHolder holder, int groupIndex) {
-        int checkedMode = getGroupCheckedMode(groupItem);
-        if (groupItem.isExpandable()) {
+    private void onGroupChecked(GroupBean groupBean, GroupViewHolder holder, int groupIndex) {
+        int checkedMode = getGroupCheckedMode(groupBean);
+        if (groupBean.isExpandable()) {
             //有子菜单
             switch (checkedMode) {
                 case CHECK_MODE_NONE:
                 case CHECK_MODE_PARTIAL:
-                    selectAllInGroup(holder, groupItem, groupIndex, true);
+                    selectAllInGroup(holder, groupBean, groupIndex, true);
                     break;
                 case CHECK_MODE_ALL:
                 default:
-                    selectAllInGroup(holder, groupItem, groupIndex, false);
+                    selectAllInGroup(holder, groupBean, groupIndex, false);
                     break;
             }
         } else {
             //无子菜单
-            if (isItemSelected(groupItem)) {
-                if (!onInterceptGroupCheckStatusChanged(groupItem, false)
-                        && removeFromCheckedList(groupItem)) {
-                    holder.setCheckMode(getGroupCheckedMode(groupItem));
+            if (isItemSelected(groupBean)) {
+                if (!onInterceptGroupCheckStatusChanged(groupBean, false)
+                        && removeFromCheckedList(groupBean)) {
+                    holder.setCheckMode(getGroupCheckedMode(groupBean));
                 }
             } else {
-                if (!onInterceptGroupCheckStatusChanged(groupItem, true)
-                        && addToCheckedList(groupItem)) {
-                    holder.setCheckMode(getGroupCheckedMode(groupItem));
+                if (!onInterceptGroupCheckStatusChanged(groupBean, true)
+                        && addToCheckedList(groupBean)) {
+                    holder.setCheckMode(getGroupCheckedMode(groupBean));
                 }
             }
         }
     }
 
-    private void selectAllInGroup(GroupViewHolder holder, GroupItem groupItem, int groupIndex, boolean selectAll) {
+    private void selectAllInGroup(GroupViewHolder holder, GroupBean groupBean, int groupIndex, boolean selectAll) {
         if (selectAll && !isGroupExpand(groupIndex)) {
             expandGroup(groupIndex);
         }
-        final List<ChildItem> children = groupItem.getChildren();
+        final List<ChildBean> children = groupBean.getChildren();
         final int groupAdapterPosition = holder.getAdapterPosition();
-        final int originalGroupCheckedMode = getGroupCheckedMode(groupItem);
+        final int originalGroupCheckedMode = getGroupCheckedMode(groupBean);
         for (int i = 0; i < children.size(); i++) {
-            ChildItem childItem = children.get(i);
+            ChildBean childBean = children.get(i);
             if (selectAll) {
-                if (isItemSelected(childItem)) {
+                if (isItemSelected(childBean)) {
                     continue;
                 }
-                if (!onInterceptChildCheckStatusChanged(groupItem, childItem, true)) {
-                    addToCheckedList(groupItem, childItem);
+                if (!onInterceptChildCheckStatusChanged(groupBean, childBean, true)) {
+                    addToCheckedList(groupBean, childBean);
                     notifyItemChanged(groupAdapterPosition + i + 1, PAYLOAD_CHECKMODE);
                 }
             } else {
-                if (!isItemSelected(childItem)) {
+                if (!isItemSelected(childBean)) {
                     continue;
                 }
-                if (!onInterceptChildCheckStatusChanged(groupItem, childItem, false)
-                        && removeFromCheckedList(groupItem, childItem)) {
+                if (!onInterceptChildCheckStatusChanged(groupBean, childBean, false)
+                        && removeFromCheckedList(groupBean, childBean)) {
                     notifyItemChanged(groupAdapterPosition + i + 1, PAYLOAD_CHECKMODE);
                 }
             }
 
         }
-        final int currentGroupCheckedMode = getGroupCheckedMode(groupItem);
+        final int currentGroupCheckedMode = getGroupCheckedMode(groupBean);
         if (currentGroupCheckedMode != originalGroupCheckedMode) {
             holder.setCheckMode(currentGroupCheckedMode);
         }
     }
 
-    private void onChildChecked(ChildViewHolder holder, GroupItem groupItem, ChildItem childItem) {
-        final int originalGroupMode = getGroupCheckedMode(groupItem);
+    private void onChildChecked(ChildViewHolder holder, GroupBean groupBean, ChildBean childBean) {
+        final int originalGroupMode = getGroupCheckedMode(groupBean);
         boolean changeFlag = false;
-        if (getChildCheckedMode(childItem) == CHECK_MODE_ALL) {
-            if (!onInterceptChildCheckStatusChanged(groupItem, childItem, false)
-                    && removeFromCheckedList(groupItem, childItem)) {
-                holder.setCheckMode(getChildCheckedMode(childItem));
+        if (getChildCheckedMode(childBean) == CHECK_MODE_ALL) {
+            if (!onInterceptChildCheckStatusChanged(groupBean, childBean, false)
+                    && removeFromCheckedList(groupBean, childBean)) {
+                holder.setCheckMode(getChildCheckedMode(childBean));
                 changeFlag = true;
             }
         } else {
-            if (!onInterceptChildCheckStatusChanged(groupItem, childItem, true)
-                    && addToCheckedList(groupItem, childItem)) {
-                holder.setCheckMode(getChildCheckedMode(childItem));
+            if (!onInterceptChildCheckStatusChanged(groupBean, childBean, true)
+                    && addToCheckedList(groupBean, childBean)) {
+                holder.setCheckMode(getChildCheckedMode(childBean));
                 changeFlag = true;
             }
         }
 
-        if (changeFlag && getGroupCheckedMode(groupItem) != originalGroupMode) {
-            notifyItemChanged(getPosition(getGroupIndex(groupItem)), PAYLOAD_CHECKMODE);
+        if (changeFlag && getGroupCheckedMode(groupBean) != originalGroupMode) {
+            notifyItemChanged(getPosition(getGroupIndex(groupBean)), PAYLOAD_CHECKMODE);
         }
     }
 
-    private boolean onInterceptGroupCheckStatusChanged(GroupItem groupItem, boolean targetStatus) {
+    private boolean onInterceptGroupCheckStatusChanged(GroupBean groupBean, boolean targetStatus) {
         return mOnCheckStatusChangeListener != null
-                && mOnCheckStatusChangeListener.onInterceptGroupCheckStatusChange(groupItem, targetStatus);
+                && mOnCheckStatusChangeListener.onInterceptGroupCheckStatusChange(groupBean, targetStatus);
     }
 
-    private boolean onInterceptChildCheckStatusChanged(GroupItem groupItem, ChildItem childItem, boolean targetStatus) {
+    private boolean onInterceptChildCheckStatusChanged(GroupBean groupBean, ChildBean childBean, boolean targetStatus) {
         return mOnCheckStatusChangeListener != null
-                && mOnCheckStatusChangeListener.onInterceptChildCheckStatusChange(groupItem, childItem, targetStatus);
+                && mOnCheckStatusChangeListener.onInterceptChildCheckStatusChange(groupBean, childBean, targetStatus);
     }
 
-    private boolean isItemSelected(GroupItem groupItem) {
+    private boolean isItemSelected(GroupBean groupBean) {
         for (CheckedItem checkedItem : mCheckedSet) {
-            if (checkedItem.getCheckedItem().equals(groupItem)) {
+            if (checkedItem.getCheckedItem().equals(groupBean)) {
                 return true;
             }
         }
         return false;
     }
 
-    private boolean isItemSelected(ChildItem childItem) {
+    private boolean isItemSelected(ChildBean childBean) {
         for (CheckedItem checkedItem : mCheckedSet) {
-            if (checkedItem.getCheckedItem().equals(childItem)) {
+            if (checkedItem.getCheckedItem().equals(childBean)) {
                 return true;
             }
         }
         return false;
     }
 
-    private boolean addToCheckedList(GroupItem groupItem) {
-        return addToCheckedList(groupItem, null);
+    private boolean addToCheckedList(GroupBean groupBean) {
+        return addToCheckedList(groupBean, null);
     }
 
-    private boolean addToCheckedList(GroupItem groupItem, ChildItem childItem) {
-        return addToCheckedList(new CheckedItem<>(groupItem, childItem));
+    private boolean addToCheckedList(GroupBean groupBean, ChildBean childBean) {
+        return addToCheckedList(new CheckedItem<>(groupBean, childBean));
     }
 
-    private boolean addToCheckedList(CheckedItem<GroupItem, ChildItem> checkedItem) {
+    private boolean addToCheckedList(CheckedItem<GroupBean, ChildBean> checkedItem) {
         if (mMaxCheckedNum == 1) {
             clearCheckedListAndUpdateUI();
         } else if (mMaxCheckedNum <= mCheckedSet.size()) {
@@ -310,24 +306,24 @@ public abstract class BaseCheckableExpandableRecyclerViewAdapter
     }
 
     private void clearCheckedListAndUpdateUI() {
-        Iterator<CheckedItem<GroupItem, ChildItem>> iter = mCheckedSet.iterator();
+        Iterator<CheckedItem<GroupBean, ChildBean>> iter = mCheckedSet.iterator();
         while (iter.hasNext()) {
-            final CheckedItem<GroupItem, ChildItem> checkedItem = iter.next();
+            final CheckedItem<GroupBean, ChildBean> checkedItem = iter.next();
             final int[] coord = getCoordFromCheckedItem(checkedItem);
-            final GroupItem originalGroupItem = getGroupItem(coord[0]);
-            final int originalGroupCheckedStatus = getGroupCheckedMode(originalGroupItem);
+            final GroupBean originalGroupBean = getGroupItem(coord[0]);
+            final int originalGroupCheckedStatus = getGroupCheckedMode(originalGroupBean);
             iter.remove();
             final int groupAdapterPosition = getPosition(coord[0]);
             final int adapterPosition = groupAdapterPosition + coord[1] + 1;
             notifyItemChanged(adapterPosition);
-            final int currentGroupCheckedStatus = getGroupCheckedMode(originalGroupItem);
+            final int currentGroupCheckedStatus = getGroupCheckedMode(originalGroupBean);
             if (coord[1] >= 0 && currentGroupCheckedStatus != originalGroupCheckedStatus) {
                 notifyItemChanged(groupAdapterPosition, PAYLOAD_CHECKMODE);
             }
         }
     }
 
-    private int[] getCoordFromCheckedItem(CheckedItem<GroupItem, ChildItem> checkedItem) {
+    private int[] getCoordFromCheckedItem(CheckedItem<GroupBean, ChildBean> checkedItem) {
         int[] result = new int[]{-1, -1};
         for (int i = 0; i < getGroupCount(); i++) {
             if (getGroupItem(i).equals(checkedItem.groupItem)) {
@@ -341,17 +337,13 @@ public abstract class BaseCheckableExpandableRecyclerViewAdapter
         return result;
     }
 
-    private boolean removeFromCheckedList(GroupItem groupItem) {
-        return removeFromCheckedList(groupItem, null);
+    private boolean removeFromCheckedList(GroupBean groupBean) {
+        return removeFromCheckedList(groupBean, null);
     }
 
-    private boolean removeFromCheckedList(GroupItem groupItem, ChildItem childItem) {
-        return mCheckedSet.remove(new CheckedItem<>(groupItem, childItem));
+    private boolean removeFromCheckedList(GroupBean groupBean, ChildBean childBean) {
+        return mCheckedSet.remove(new CheckedItem<>(groupBean, childBean));
     }
-
-    /******************
-     * interface
-     ******************/
 
     public abstract static class BaseCheckableGroupViewHolder extends BaseGroupViewHolder implements Selectable {
         public BaseCheckableGroupViewHolder(View itemView) {
