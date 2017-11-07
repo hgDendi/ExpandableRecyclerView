@@ -27,26 +27,47 @@ public abstract class RecyclerViewAdapterEx<VH extends RecyclerView.ViewHolder> 
     protected ViewProducer mHeaderViewProducer;
     protected boolean mIsEmpty;
 
-    /******************
-     * abstract methods
-     ******************/
-
+    /**
+     * equivalent to {@link #getItemCount()}
+     *
+     * @return
+     */
     public abstract int getCount();
 
+    /**
+     * equivalent to {@link #getItemViewType(int)}
+     *
+     * @param positoin
+     * @return
+     */
     public abstract int getViewType(int positoin);
 
+    /**
+     * equivalent to {@link #onCreateViewHolder(ViewGroup, int)}}
+     *
+     * @param parent
+     * @param viewType
+     * @return
+     */
     public abstract VH onCreateCustomizeViewHolder(final ViewGroup parent, int viewType);
 
+    /**
+     * equivalent to {@link #onBindViewHolder(RecyclerView.ViewHolder, int)}
+     *
+     * @param holder
+     * @param position
+     */
     public abstract void onBindCustomizeViewHolder(final VH holder, int position);
 
     protected void onBindCustomizeViewHolder(final VH holder, int position, List<Object> payloads) {
         onBindCustomizeViewHolder(holder, position);
     }
 
-    /******************
-     * external interface
-     ******************/
-
+    /**
+     * set empty view
+     *
+     * @param emptyViewProducer see {@link ViewProducer}
+     */
     public void setEmptyViewProducer(ViewProducer emptyViewProducer) {
         if (mEmptyViewProducer != emptyViewProducer) {
             mEmptyViewProducer = emptyViewProducer;
@@ -56,6 +77,11 @@ public abstract class RecyclerViewAdapterEx<VH extends RecyclerView.ViewHolder> 
         }
     }
 
+    /**
+     * set Header view
+     *
+     * @param emptyViewProducer see {@link ViewProducer}
+     */
     public void setHeaderViewProducer(ViewProducer emptyViewProducer) {
         if (mHeaderViewProducer != emptyViewProducer) {
             mHeaderViewProducer = emptyViewProducer;

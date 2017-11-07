@@ -11,7 +11,8 @@ import com.hgdendi.expandablerecycleradapter.BaseExpandableRecyclerViewAdapter;
 
 import java.util.List;
 
-public class SampleAdapter extends BaseExpandableRecyclerViewAdapter<SampleGroupBean, SampleAdapter.GroupVH, SampleAdapter.ChildVH> {
+public class SampleAdapter extends
+        BaseExpandableRecyclerViewAdapter<SampleGroupBean, SampleChildBean, SampleAdapter.GroupVH, SampleAdapter.ChildVH> {
 
     private List<SampleGroupBean> mList;
 
@@ -30,35 +31,36 @@ public class SampleAdapter extends BaseExpandableRecyclerViewAdapter<SampleGroup
     }
 
     @Override
-    public GroupVH onCreateGroupViewHolder(ViewGroup parent) {
+    public GroupVH onCreateGroupViewHolder(ViewGroup parent, int groupViewType) {
         return new GroupVH(
                 LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.listitem_group, parent, false));
     }
 
     @Override
-    public ChildVH onCreateChildViewHolder(ViewGroup parent) {
+    public ChildVH onCreateChildViewHolder(ViewGroup parent, int childViewType) {
         return new ChildVH(
                 LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.listitem_child, parent, false));
     }
 
     @Override
-    public void onBindGroupViewHolder(GroupVH holder, SampleGroupBean sampleGroupBean, boolean isExpand) {
+    public void onBindGroupViewHolder(GroupVH holder, SampleGroupBean sampleGroupBean, boolean isExpanding) {
         holder.nameTv.setText(sampleGroupBean.getName());
-        if (sampleGroupBean.getChildCount() <= 0) {
-            holder.foldIv.setVisibility(View.INVISIBLE);
-        } else {
+        if (sampleGroupBean.isExpandable()) {
             holder.foldIv.setVisibility(View.VISIBLE);
+            holder.foldIv.setImageResource(isExpanding ? R.drawable.ic_arrow_expanding : R.drawable.ic_arrow_folding);
+        } else {
+            holder.foldIv.setVisibility(View.INVISIBLE);
         }
     }
 
     @Override
-    public void onBindChildViewHolder(ChildVH holder, SampleGroupBean sampleGroupBean, int childIndex) {
-        holder.nameTv.setText(sampleGroupBean.getChildAt(childIndex).getName());
+    public void onBindChildViewHolder(ChildVH holder, SampleGroupBean groupBean, SampleChildBean sampleChildBean) {
+        holder.nameTv.setText(sampleChildBean.getName());
     }
 
-    static class GroupVH extends RecyclerView.ViewHolder {
+    static class GroupVH extends BaseExpandableRecyclerViewAdapter.BaseGroupViewHolder {
         ImageView foldIv;
         TextView nameTv;
 
@@ -66,6 +68,11 @@ public class SampleAdapter extends BaseExpandableRecyclerViewAdapter<SampleGroup
             super(itemView);
             foldIv = (ImageView) itemView.findViewById(R.id.group_item_indicator);
             nameTv = (TextView) itemView.findViewById(R.id.group_item_name);
+        }
+
+        @Override
+        protected void onExpandStatusChanged(RecyclerView.Adapter relatedAdapter, boolean isExpanding) {
+            foldIv.setImageResource(isExpanding ? R.drawable.ic_arrow_expanding : R.drawable.ic_arrow_folding);
         }
     }
 

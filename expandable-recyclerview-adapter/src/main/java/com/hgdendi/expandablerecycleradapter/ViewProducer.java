@@ -18,11 +18,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 public interface ViewProducer {
-    int VIEW_TYPE_EMPTY = Integer.MAX_VALUE;
-    int VIEW_TYPE_HEADER = Integer.MAX_VALUE - 1;
+    int VIEW_TYPE_EMPTY = 1 << 30;
+    int VIEW_TYPE_HEADER = VIEW_TYPE_EMPTY >> 1;
 
     /**
-     * equivalent to {@link android.support.v7.widget.RecyclerView.Adapter#onCreateViewHolder(RecyclerView.ViewHolder, int)}
+     * equivalent to {@link android.support.v7.widget.RecyclerView.Adapter#onCreateViewHolder(ViewGroup, int)}
      *
      * @param parent
      * @return

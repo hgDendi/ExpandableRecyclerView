@@ -24,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
             list.add(new SampleGroupBean(childList, "group " + i));
         }
 
-        final RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recyclerview);
+        final RecyclerView recyclerView = findViewById(R.id.recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(new SampleAdapter(list));
     }

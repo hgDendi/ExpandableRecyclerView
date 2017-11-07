@@ -1,7 +1,7 @@
 package com.hgdendi.expandablerecyclerview;
 
 public class SampleChildBean {
-    String mName;
+    private String mName;
 
     public SampleChildBean(String name) {
         mName = name;
