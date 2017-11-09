@@ -30,6 +30,7 @@ class SampleGroupBean implements BaseExpandableRecyclerViewAdapter.BaseGroupBean
         return mName;
     }
 
+    @Override
     public SampleChildBean getChildAt(int index) {
         return mList.size() <= index ? null : mList.get(index);
     }

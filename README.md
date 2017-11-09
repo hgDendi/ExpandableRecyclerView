@@ -3,9 +3,9 @@ Customized recyclerViewAdapter which shows items in a 2-level list.
 
 ![demo](https://github.com/hgDendi/ExpandableRecyclerView/blob/master/expandableRecyclerView.gif)
 
-It encapsulates the **expand and fold operation** in abstract class [ExpandableListAdapter](https://github.com/hgDendi/ExpandableRecyclerView/blob/master/expandablerecycleradapter/src/main/java/com/hgdendi/expandablerecycleradapter/ExpandableRecyclerViewAdapter.java),which makes it flexible.
+It encapsulates the **expand and fold operation** in abstract class [BaseExpandableListAdapter](https://github.com/hgDendi/ExpandableRecyclerView/blob/master/expandablerecycleradapter/src/main/java/com/hgdendi/expandablerecycleradapter/ExpandableRecyclerViewAdapter.java),which makes it flexible.
 
-See the usage below , all you need to do is just extending the class and overriding these 5 methods:
+See the usage below , all you need to do is just extending the class and overriding these 6 methods:
 
 * **getGroupCount**
 * **getGroupItem**
@@ -28,8 +28,8 @@ dependencies{
 
 ```java
 // !!Notice the generics here
-public class SampleAdapter extends ExpandableRecyclerViewAdapter
-        <GroupBean, SampleAdapter.GroupVH, SampleAdapter.ChildVH> {
+public class SampleAdapter extends BaseExpandableRecyclerViewAdapter
+<SampleGroupBean, SampleChildBean, SampleAdapter.GroupVH, SampleAdapter.ChildVH>
 
     @Override
     public int getGroupCount() {
@@ -37,7 +37,7 @@ public class SampleAdapter extends ExpandableRecyclerViewAdapter
     }
 
     @Override
-    public GroupBean getGroupItem(int position) {
+    public GroupBean getGroupItem(int groupIndex) {
         //return the bean according to the groupIndex
     }
 
@@ -62,17 +62,42 @@ public class SampleAdapter extends ExpandableRecyclerViewAdapter
 Relating classes:
 
 ```java
-class GroupVH extends RecyclerView.ViewHolder {
-    //customize
-}
-
-class ChildVH extends RecyclerView.ViewHolder {
-    //customize
-}
-    
-class GroupBean implements ExpandableRecyclerViewAdapter.GroupNode {
+class SampleGroupBean implements BaseExpandableRecyclerViewAdapter.BaseGroupBean<SampleChildBean> {
     @Override
     public int getChildCount() {
+        return mList.size();
+    }
+
+    // whether this group is expandable
+    @Override
+    public boolean isExpandable() {
+        return getChildCount() > 0;
+    }
+  
+  	@Override
+    public SampleChildBean getChildAt(int index) {
+        return mList.size() <= index ? null : mList.get(index);
+    }
+}
+
+public class SampleChildBean {
+}
+
+static class GroupVH extends BaseExpandableRecyclerViewAdapter.BaseGroupViewHolder {
+    GroupVH(View itemView) {
+        super(itemView);
+    }
+
+    // this method is used for partial update.Which means when expand status changed,only a part of this view need to invalidate
+    @Override
+    protected void onExpandStatusChanged(RecyclerView.Adapter relatedAdapter, boolean isExpanding) {
+    }
+}
+
+static class ChildVH extends RecyclerView.ViewHolder {
+    ChildVH(View itemView) {
+        super(itemView);
+        nameTv = (TextView) itemView.findViewById(R.id.child_item_name);
     }
 }
 ```
