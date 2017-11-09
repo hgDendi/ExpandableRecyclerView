@@ -20,9 +20,7 @@ As onCreateViewHolder & onBindViewHolder are compulsive methods which need devel
 
 ```groovy
 dependencies{
-	...
-	//todo
-	compile ''
+	compile 'com.hgDendi:expandable-recyclerview-adapter:0.0.2'
 }
 ```
 
