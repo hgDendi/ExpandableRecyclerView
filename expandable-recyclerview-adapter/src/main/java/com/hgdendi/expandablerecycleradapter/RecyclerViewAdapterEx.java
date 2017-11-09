@@ -52,7 +52,7 @@ public abstract class RecyclerViewAdapterEx<VH extends RecyclerView.ViewHolder> 
     public abstract VH onCreateCustomizeViewHolder(final ViewGroup parent, int viewType);
 
     /**
-     * equivalent to {@link #onBindViewHolder(RecyclerView.ViewHolder, int)}
+     * equivalent to onBindViewHolder(RecyclerView.ViewHolder, int)
      *
      * @param holder
      * @param position

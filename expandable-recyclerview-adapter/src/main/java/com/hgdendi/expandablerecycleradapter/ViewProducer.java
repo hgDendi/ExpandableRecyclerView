@@ -22,7 +22,7 @@ public interface ViewProducer {
     int VIEW_TYPE_HEADER = VIEW_TYPE_EMPTY >> 1;
 
     /**
-     * equivalent to {@link android.support.v7.widget.RecyclerView.Adapter#onCreateViewHolder(ViewGroup, int)}
+     * equivalent to RecyclerView.Adapter#onCreateViewHolder(ViewGroup, int)
      *
      * @param parent
      * @return
@@ -30,7 +30,7 @@ public interface ViewProducer {
     RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent);
 
     /**
-     * equivalent to {@link android.support.v7.widget.RecyclerView.Adapter#onBindViewHolder(RecyclerView.ViewHolder, int)}
+     * equivalent to RecyclerView.Adapter#onBindViewHolder(RecyclerView.ViewHolder, int)
      *
      * @param holder
      */

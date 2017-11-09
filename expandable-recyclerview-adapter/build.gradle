@@ -13,14 +13,14 @@ ext {
     siteUrl = 'https://github.com/hgDendi/ExpandableRecyclerView'
     gitUrl = 'https://github.com/hgDendi/ExpandableRecyclerView.git'
 
-    libraryVersion = '0.0.1'
+    libraryVersion = '0.0.2'
 
     developerId = 'dendi'
     developerName = 'Dendi Chan'
     developerEmail = 'hg.dendi@gmail.com'
 
     licenseName = 'The MIT License'
-    licenseUrl = 'https://rem.mit-license.org/'
+    licenseUrl = 'https://rem.mit-license.org'
     allLicenses = ["MIT"]
 }
 
@@ -53,7 +53,8 @@ dependencies {
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:27.0.0'
     compile 'com.android.support:recyclerview-v7:27.0.0'
+    implementation 'com.android.support:support-annotations:27.0.0'
 }
 
-//apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
-//apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
+apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'

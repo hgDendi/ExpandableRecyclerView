@@ -177,7 +177,6 @@ public abstract class BaseCheckableExpandableRecyclerViewAdapter
     private void onGroupChecked(GroupBean groupBean, GroupViewHolder holder, int groupIndex) {
         int checkedMode = getGroupCheckedMode(groupBean);
         if (groupBean.isExpandable()) {
-            //有子菜单
             switch (checkedMode) {
                 case CHECK_MODE_NONE:
                 case CHECK_MODE_PARTIAL:
@@ -189,7 +188,6 @@ public abstract class BaseCheckableExpandableRecyclerViewAdapter
                     break;
             }
         } else {
-            //无子菜单
             if (isItemSelected(groupBean)) {
                 if (!onInterceptGroupCheckStatusChanged(groupBean, false)
                         && removeFromCheckedList(groupBean)) {
