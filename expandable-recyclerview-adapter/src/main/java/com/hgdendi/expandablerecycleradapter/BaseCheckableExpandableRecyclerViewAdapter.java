@@ -12,8 +12,6 @@
  */
 package com.hgdendi.expandablerecycleradapter;
 
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 
@@ -389,22 +387,18 @@ public abstract class BaseCheckableExpandableRecyclerViewAdapter
     }
 
     public static class CheckedItem<GroupItem, ChildItem> {
-        @NonNull
         GroupItem groupItem;
-        @Nullable
         ChildItem childItem;
 
-        public CheckedItem(@NonNull GroupItem groupItem, @Nullable ChildItem childItem) {
+        public CheckedItem(GroupItem groupItem, ChildItem childItem) {
             this.groupItem = groupItem;
             this.childItem = childItem;
         }
 
-        @NonNull
         public GroupItem getGroupItem() {
             return groupItem;
         }
 
-        @Nullable
         public ChildItem getChildItem() {
             return childItem;
         }
