@@ -4,6 +4,10 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.LayoutInflater;
+import android.view.ViewGroup;
+
+import com.hgdendi.expandablerecycleradapter.ViewProducer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +31,32 @@ public class MainActivity extends AppCompatActivity {
         final RecyclerView recyclerView = findViewById(R.id.recyclerview);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         SampleAdapter adapter = new SampleAdapter(list);
+        adapter.setEmptyViewProducer(new ViewProducer() {
+            @Override
+            public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent) {
+                return new DefaultEmptyViewHolder(
+                        LayoutInflater.from(parent.getContext()).inflate(R.layout.empty, parent, false)
+                );
+            }
+
+            @Override
+            public void onBindViewHolder(RecyclerView.ViewHolder holder) {
+
+            }
+        });
+        adapter.setHeaderViewProducer(new ViewProducer() {
+            @Override
+            public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent) {
+                return new DefaultEmptyViewHolder(
+                        LayoutInflater.from(parent.getContext()).inflate(R.layout.header, parent, false)
+                );
+            }
+
+            @Override
+            public void onBindViewHolder(RecyclerView.ViewHolder holder) {
+
+            }
+        }, false);
         recyclerView.setAdapter(adapter);
     }
 }

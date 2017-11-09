@@ -1,7 +1,7 @@
 # ExpandableRecyclerView
 Customized recyclerViewAdapter which shows items in a 2-level list.
 
-![demo](https://github.com/hgDendi/ExpandableRecyclerView/blob/master/expandableRecyclerView.gif)
+![demo](https://github.com/hgDendi/ExpandableRecyclerView/blob/master/img/expandableRecyclerView.gif)
 
 It encapsulates the **expand and fold operation** in abstract class [BaseExpandableListAdapter](https://github.com/hgDendi/ExpandableRecyclerView/blob/master/expandablerecycleradapter/src/main/java/com/hgdendi/expandablerecycleradapter/ExpandableRecyclerViewAdapter.java),which makes it flexible.
 

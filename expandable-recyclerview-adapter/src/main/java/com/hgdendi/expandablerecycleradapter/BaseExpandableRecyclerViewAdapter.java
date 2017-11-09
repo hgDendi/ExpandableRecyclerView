@@ -48,6 +48,7 @@ public abstract class BaseExpandableRecyclerViewAdapter
     private ExpandableRecyclerViewOnClickListener<GroupBean, ChildBean> mListener;
 
     private boolean mIsEmpty;
+    private boolean mShowHeaderViewWhenEmpty;
     private ViewProducer mEmptyViewProducer;
     private ViewProducer mHeaderViewProducer;
 
@@ -161,7 +162,8 @@ public abstract class BaseExpandableRecyclerViewAdapter
         }
     }
 
-    public void setHeaderViewProducer(ViewProducer headerViewProducer) {
+    public void setHeaderViewProducer(ViewProducer headerViewProducer, boolean showWhenEmpty) {
+        mShowHeaderViewWhenEmpty = showWhenEmpty;
         if (mHeaderViewProducer != headerViewProducer) {
             mHeaderViewProducer = headerViewProducer;
             notifyDataSetChanged();
@@ -219,7 +221,7 @@ public abstract class BaseExpandableRecyclerViewAdapter
         int result = getGroupCount();
         if (result == 0 && mEmptyViewProducer != null) {
             mIsEmpty = true;
-            return mHeaderViewProducer == null ? 1 : 2;
+            return mHeaderViewProducer != null && mShowHeaderViewWhenEmpty ? 2 : 1;
         }
         mIsEmpty = false;
         for (GroupBean groupBean : mExpandGroupSet) {
@@ -249,7 +251,7 @@ public abstract class BaseExpandableRecyclerViewAdapter
     }
 
     public final int getGroupIndex(int position) {
-        if (mIsEmpty || position < 0 || (mHeaderViewProducer != null && position == 0)) {
+        if (mIsEmpty || position < 0 || (position == 0 && mHeaderViewProducer != null && !mShowHeaderViewWhenEmpty)) {
             return -1;
         }
         return translateToDoubleIndex(position)[0];
@@ -266,11 +268,11 @@ public abstract class BaseExpandableRecyclerViewAdapter
 
     @Override
     public final int getItemViewType(int position) {
-        if (mHeaderViewProducer != null && position == 0) {
-            return TYPE_HEADER;
-        }
         if (mIsEmpty) {
-            return TYPE_EMPTY;
+            return position == 0 && mShowHeaderViewWhenEmpty ? TYPE_HEADER : TYPE_EMPTY;
+        }
+        if (position == 0 && mHeaderViewProducer != null) {
+            return TYPE_HEADER;
         }
         int[] coord = translateToDoubleIndex(position);
         GroupBean groupBean = getGroupItem(coord[0]);
@@ -414,7 +416,7 @@ public abstract class BaseExpandableRecyclerViewAdapter
         if (mHeaderViewProducer != null) {
             position--;
         }
-        final int[] result = new int[2];
+        final int[] result = new int[]{-1, -1};
         final int groupCount = getGroupCount();
         int positionCursor = 0;
         for (int groupCursor = 0; groupCursor < groupCount; groupCursor++) {
@@ -439,9 +441,6 @@ public abstract class BaseExpandableRecyclerViewAdapter
         return result;
     }
 
-    /******************
-     * interface
-     ******************/
 
     public interface BaseGroupBean<ChildBean> {
         /**

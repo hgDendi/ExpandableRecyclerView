@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">ExpandableRecyclerView</string>
+    <string name="header">header</string>
+    <string name="empty">empty</string>
 </resources>
