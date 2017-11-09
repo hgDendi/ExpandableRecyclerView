@@ -8,7 +8,7 @@ It encapsulates the **expand and fold operation** in abstract class [ExpandableL
 See the usage below , all you need to do is just extending the class and overriding these 5 methods:
 
 * **getGroupCount**
-* **getGroupPosition**
+* **getGroupItem**
 * onCreateGroupViewHolder
 * onCreateChildViewHolder
 * onBindGroupViewHolder
@@ -27,6 +27,7 @@ dependencies{
 ## Usage
 
 ```java
+// !!Notice the generics here
 public class SampleAdapter extends ExpandableRecyclerViewAdapter
         <GroupBean, SampleAdapter.GroupVH, SampleAdapter.ChildVH> {
 
@@ -41,11 +42,11 @@ public class SampleAdapter extends ExpandableRecyclerViewAdapter
     }
 
     @Override
-    public GroupVH onCreateGroupViewHolder(ViewGroup parent) {
+    public GroupVH onCreateGroupViewHolder(ViewGroup parent, int groupViewType) {
     }
 
     @Override
-    public ChildVH onCreateChildViewHolder(ViewGroup parent) {
+    public ChildVH onCreateChildViewHolder(ViewGroup parent, int childViewType) {
     }
 
     @Override
@@ -56,7 +57,6 @@ public class SampleAdapter extends ExpandableRecyclerViewAdapter
     public void onBindChildViewHolder(ChildVH holder, SampleGroupBean sampleGroupBean, int childIndex) {
     }
 }
-
 ```
 
 Relating classes:
