@@ -1,4 +1,7 @@
 # ExpandableRecyclerView
+
+[【中文README】](https://github.com/hgDendi/ExpandableRecyclerView/blob/master/README_CN.md)
+
 Customized recyclerViewAdapter which shows items in a 2-level list.
 
 ![demo](https://github.com/hgDendi/ExpandableRecyclerView/blob/master/img/expandableRecyclerView.gif)

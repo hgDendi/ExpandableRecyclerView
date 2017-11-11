@@ -188,7 +188,7 @@ public abstract class BaseExpandableRecyclerViewAdapter
             mExpandGroupSet.add(groupBean);
             final int position = getPosition(groupIndex);
             notifyItemRangeInserted(position + 1, groupBean.getChildCount());
-            notifyItemChanged(position);
+            notifyItemChanged(position, EXPAND_PAYLOAD);
             return true;
         }
         return false;
@@ -320,7 +320,7 @@ public abstract class BaseExpandableRecyclerViewAdapter
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position, List<Object> payloads) {
+    public final void onBindViewHolder(RecyclerView.ViewHolder holder, int position, List<Object> payloads) {
         switch (holder.getItemViewType() & TYPE_MASK) {
             case TYPE_EMPTY:
                 mEmptyViewProducer.onBindViewHolder(holder);
@@ -475,6 +475,8 @@ public abstract class BaseExpandableRecyclerViewAdapter
          * optimize for partial invalidate,
          * when switching fold status.
          * Default implementation is update the whole {android.support.v7.widget.RecyclerView.ViewHolder#itemView}.
+         *
+         * Warning:If the itemView is invisible , the callback will not be called.
          *
          * @param relatedAdapter
          * @param isExpanding
