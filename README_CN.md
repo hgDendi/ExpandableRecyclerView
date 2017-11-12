@@ -25,7 +25,7 @@ github:https://github.com/hgDendi/ExpandableRecyclerView
 
 ```Groovy
 dependencies{
-	compile 'com.hgDendi:expandable-recyclerview-adapter:0.0.2'
+	compile 'com.hgDendi:expandable-recyclerview-adapter:1.0.0'
 }
 ```
 
