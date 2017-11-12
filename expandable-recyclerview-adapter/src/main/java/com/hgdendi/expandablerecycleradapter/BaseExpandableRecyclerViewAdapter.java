@@ -292,9 +292,9 @@ public abstract class BaseExpandableRecyclerViewAdapter
             case TYPE_HEADER:
                 return mHeaderViewProducer.onCreateViewHolder(parent);
             case TYPE_CHILD:
-                return onCreateChildViewHolder(parent, viewType ^ TYPE_CHILD);
+                return onCreateChildViewHolder(parent, viewType);
             case TYPE_GROUP:
-                return onCreateGroupViewHolder(parent, viewType ^ TYPE_GROUP);
+                return onCreateGroupViewHolder(parent, viewType);
             default:
                 throw new IllegalStateException(
                         String.format(Locale.getDefault(), "Illegal view type : viewType[%d]", viewType));
