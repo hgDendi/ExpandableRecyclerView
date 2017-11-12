@@ -330,7 +330,7 @@ public abstract class BaseExpandableRecyclerViewAdapter
         }
     }
 
-    private void bindGroupViewHolder(final GroupViewHolder holder, final GroupBean groupBean, List<Object> payload) {
+    protected void bindGroupViewHolder(final GroupViewHolder holder, final GroupBean groupBean, List<Object> payload) {
         if (payload != null && payload.size() != 0) {
             if (payload.contains(EXPAND_PAYLOAD)) {
                 holder.onExpandStatusChanged(BaseExpandableRecyclerViewAdapter.this, isGroupExpanding(groupBean));
@@ -381,7 +381,7 @@ public abstract class BaseExpandableRecyclerViewAdapter
         onBindGroupViewHolder(holder, groupBean, isGroupExpanding(groupBean));
     }
 
-    private void bindChildViewHolder(ChildViewHolder holder, final GroupBean groupBean, final ChildBean childBean, List<Object> payload) {
+    protected void bindChildViewHolder(ChildViewHolder holder, final GroupBean groupBean, final ChildBean childBean, List<Object> payload) {
         onBindChildViewHolder(holder, groupBean, childBean, payload);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -13,7 +13,7 @@ ext {
     siteUrl = 'https://github.com/hgDendi/ExpandableRecyclerView'
     gitUrl = 'https://github.com/hgDendi/ExpandableRecyclerView.git'
 
-    libraryVersion = '0.0.2'
+    libraryVersion = '1.0.0'
 
     developerId = 'dendi'
     developerName = 'Dendi Chan'
