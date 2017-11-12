@@ -124,6 +124,14 @@ public abstract class BaseExpandableRecyclerViewAdapter
     }
 
     /**
+     * create {@link ChildViewHolder} for child item
+     *
+     * @param parent
+     * @return
+     */
+    abstract public ChildViewHolder onCreateChildViewHolder(ViewGroup parent, int childViewType);
+
+    /**
      * bind {@link ChildViewHolder}
      *
      * @param holder
@@ -132,13 +140,6 @@ public abstract class BaseExpandableRecyclerViewAdapter
      */
     abstract public void onBindChildViewHolder(ChildViewHolder holder, GroupBean groupBean, ChildBean childBean);
 
-    /**
-     * create {@link ChildViewHolder} for child item
-     *
-     * @param parent
-     * @return
-     */
-    abstract public ChildViewHolder onCreateChildViewHolder(ViewGroup parent, int childViewType);
 
     /**
      * bind {@link ChildViewHolder} with payload , used to invalidate partially
@@ -174,19 +175,14 @@ public abstract class BaseExpandableRecyclerViewAdapter
         mListener = listener;
     }
 
-    public final boolean isGroupExpand(GroupBean groupBean) {
+    public final boolean isGroupExpanding(GroupBean groupBean) {
         return mExpandGroupSet.contains(groupBean);
     }
 
-    public final boolean isGroupExpand(int groupIndex) {
-        return mExpandGroupSet.contains(getGroupItem(groupIndex));
-    }
-
-    public final boolean expandGroup(int groupIndex) {
-        GroupBean groupBean = getGroupItem(groupIndex);
-        if (groupBean.isExpandable() && !isGroupExpand(groupBean)) {
+    public final boolean expandGroup(GroupBean groupBean) {
+        if (groupBean.isExpandable() && !isGroupExpanding(groupBean)) {
             mExpandGroupSet.add(groupBean);
-            final int position = getPosition(groupIndex);
+            final int position = getAdapterPosition(getGroupIndex(groupBean));
             notifyItemRangeInserted(position + 1, groupBean.getChildCount());
             notifyItemChanged(position, EXPAND_PAYLOAD);
             return true;
@@ -198,19 +194,18 @@ public abstract class BaseExpandableRecyclerViewAdapter
         Iterator<GroupBean> iter = mExpandGroupSet.iterator();
         while (iter.hasNext()) {
             GroupBean groupBean = iter.next();
-            final int position = getPosition(getGroupIndex(groupBean));
+            final int position = getAdapterPosition(getGroupIndex(groupBean));
             notifyItemRangeRemoved(position + 1, groupBean.getChildCount());
-            notifyItemChanged(position);
+            notifyItemChanged(position, EXPAND_PAYLOAD);
             iter.remove();
         }
     }
 
-    public final boolean foldGroup(int groupIndex) {
-        GroupBean groupBean = getGroupItem(groupIndex);
+    public final boolean foldGroup(GroupBean groupBean) {
         if (mExpandGroupSet.remove(groupBean)) {
-            final int position = getPosition(groupIndex);
+            final int position = getAdapterPosition(getGroupIndex(groupBean));
             notifyItemRangeRemoved(position + 1, groupBean.getChildCount());
-            notifyItemChanged(position);
+            notifyItemChanged(position, EXPAND_PAYLOAD);
             return true;
         }
         return false;
@@ -237,7 +232,7 @@ public abstract class BaseExpandableRecyclerViewAdapter
         return result;
     }
 
-    public final int getPosition(int groupIndex) {
+    public final int getAdapterPosition(int groupIndex) {
         int result = groupIndex;
         for (GroupBean groupBean : mExpandGroupSet) {
             if (getGroupIndex(groupBean) >= 0 && getGroupIndex(groupBean) < groupIndex) {
@@ -248,13 +243,6 @@ public abstract class BaseExpandableRecyclerViewAdapter
             result++;
         }
         return result;
-    }
-
-    public final int getGroupIndex(int position) {
-        if (mIsEmpty || position < 0 || (position == 0 && mHeaderViewProducer != null && !mShowHeaderViewWhenEmpty)) {
-            return -1;
-        }
-        return translateToDoubleIndex(position)[0];
     }
 
     public final int getGroupIndex(@NonNull GroupBean groupBean) {
@@ -269,7 +257,7 @@ public abstract class BaseExpandableRecyclerViewAdapter
     @Override
     public final int getItemViewType(int position) {
         if (mIsEmpty) {
-            return position == 0 && mShowHeaderViewWhenEmpty ? TYPE_HEADER : TYPE_EMPTY;
+            return position == 0 && mShowHeaderViewWhenEmpty && mHeaderViewProducer != null ? TYPE_HEADER : TYPE_EMPTY;
         }
         if (position == 0 && mHeaderViewProducer != null) {
             return TYPE_HEADER;
@@ -342,15 +330,15 @@ public abstract class BaseExpandableRecyclerViewAdapter
         }
     }
 
-    protected void bindGroupViewHolder(final GroupViewHolder holder, final GroupBean groupBean, List<Object> payload) {
+    private void bindGroupViewHolder(final GroupViewHolder holder, final GroupBean groupBean, List<Object> payload) {
         if (payload != null && payload.size() != 0) {
             if (payload.contains(EXPAND_PAYLOAD)) {
-                holder.onExpandStatusChanged(BaseExpandableRecyclerViewAdapter.this, isGroupExpand(groupBean));
+                holder.onExpandStatusChanged(BaseExpandableRecyclerViewAdapter.this, isGroupExpanding(groupBean));
                 if (payload.size() == 1) {
                     return;
                 }
             }
-            onBindGroupViewHolder(holder, groupBean, isGroupExpand(groupBean), payload);
+            onBindGroupViewHolder(holder, groupBean, isGroupExpanding(groupBean), payload);
             return;
         }
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
@@ -390,10 +378,10 @@ public abstract class BaseExpandableRecyclerViewAdapter
                 }
             });
         }
-        onBindGroupViewHolder(holder, groupBean, isGroupExpand(groupBean));
+        onBindGroupViewHolder(holder, groupBean, isGroupExpanding(groupBean));
     }
 
-    protected void bindChildViewHolder(ChildViewHolder holder, final GroupBean groupBean, final ChildBean childBean, List<Object> payload) {
+    private void bindChildViewHolder(ChildViewHolder holder, final GroupBean groupBean, final ChildBean childBean, List<Object> payload) {
         onBindChildViewHolder(holder, groupBean, childBean, payload);
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -409,18 +397,18 @@ public abstract class BaseExpandableRecyclerViewAdapter
      * position translation
      * from adapterPosition to group-child coord
      *
-     * @param position adapterPosition
+     * @param adapterPosition adapterPosition
      * @return int[]{groupIndex,childIndex}
      */
-    protected final int[] translateToDoubleIndex(int position) {
+    protected final int[] translateToDoubleIndex(int adapterPosition) {
         if (mHeaderViewProducer != null) {
-            position--;
+            adapterPosition--;
         }
         final int[] result = new int[]{-1, -1};
         final int groupCount = getGroupCount();
-        int positionCursor = 0;
+        int adaptePositionCursor = 0;
         for (int groupCursor = 0; groupCursor < groupCount; groupCursor++) {
-            if (positionCursor == position) {
+            if (adaptePositionCursor == adapterPosition) {
                 result[0] = groupCursor;
                 result[1] = -1;
                 break;
@@ -428,15 +416,15 @@ public abstract class BaseExpandableRecyclerViewAdapter
             GroupBean groupBean = getGroupItem(groupCursor);
             if (mExpandGroupSet.contains(groupBean)) {
                 final int childCount = groupBean.getChildCount();
-                final int offset = position - positionCursor;
+                final int offset = adapterPosition - adaptePositionCursor;
                 if (childCount >= offset) {
                     result[0] = groupCursor;
                     result[1] = offset - 1;
                     break;
                 }
-                positionCursor += childCount;
+                adaptePositionCursor += childCount;
             }
-            positionCursor++;
+            adaptePositionCursor++;
         }
         return result;
     }
@@ -475,7 +463,7 @@ public abstract class BaseExpandableRecyclerViewAdapter
          * optimize for partial invalidate,
          * when switching fold status.
          * Default implementation is update the whole {android.support.v7.widget.RecyclerView.ViewHolder#itemView}.
-         *
+         * <p>
          * Warning:If the itemView is invisible , the callback will not be called.
          *
          * @param relatedAdapter

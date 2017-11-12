@@ -201,8 +201,8 @@ public abstract class BaseCheckableExpandableRecyclerViewAdapter
     }
 
     private void selectAllInGroup(GroupViewHolder holder, GroupBean groupBean, int groupIndex, boolean selectAll) {
-        if (selectAll && !isGroupExpand(groupIndex)) {
-            expandGroup(groupIndex);
+        if (selectAll && !isGroupExpanding(groupBean)) {
+            expandGroup(groupBean);
         }
         final List<ChildBean> children = groupBean.getChildren();
         final int groupAdapterPosition = holder.getAdapterPosition();
@@ -252,7 +252,7 @@ public abstract class BaseCheckableExpandableRecyclerViewAdapter
         }
 
         if (changeFlag && getGroupCheckedMode(groupBean) != originalGroupMode) {
-            notifyItemChanged(getPosition(getGroupIndex(groupBean)), PAYLOAD_CHECKMODE);
+            notifyItemChanged(getAdapterPosition(getGroupIndex(groupBean)), PAYLOAD_CHECKMODE);
         }
     }
 
@@ -309,7 +309,7 @@ public abstract class BaseCheckableExpandableRecyclerViewAdapter
             final GroupBean originalGroupBean = getGroupItem(coord[0]);
             final int originalGroupCheckedStatus = getGroupCheckedMode(originalGroupBean);
             iter.remove();
-            final int groupAdapterPosition = getPosition(coord[0]);
+            final int groupAdapterPosition = getAdapterPosition(coord[0]);
             final int adapterPosition = groupAdapterPosition + coord[1] + 1;
             notifyItemChanged(adapterPosition);
             final int currentGroupCheckedStatus = getGroupCheckedMode(originalGroupBean);
