@@ -288,9 +288,9 @@ public final RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int vi
         case TYPE_HEADER:
             return mHeaderViewProducer.onCreateViewHolder(parent);
         case TYPE_CHILD:
-            return onCreateChildViewHolder(parent, viewType);
+            return onCreateChildViewHolder(parent, viewType ^ TYPE_CHILD);
         case TYPE_GROUP:
-            return onCreateGroupViewHolder(parent, viewType);
+            return onCreateGroupViewHolder(parent, viewType ^ TYPE_GROUP);
         default:
             throw new IllegalStateException(
                 String.format(Locale.getDefault(), "Illegal view type : viewType[%d]", viewType));
