@@ -282,15 +282,15 @@ public final int getItemViewType(int position) {
 ```java
 @Override
 public final RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-    switch (viewType) {
+    switch (viewType & TYPE_MASK) {
         case TYPE_EMPTY:
             return mEmptyViewProducer.onCreateViewHolder(parent);
         case TYPE_HEADER:
             return mHeaderViewProducer.onCreateViewHolder(parent);
         case TYPE_CHILD:
-            return onCreateChildViewHolder(parent, viewType ^ TYPE_CHILD);
+            return onCreateChildViewHolder(parent, viewType);
         case TYPE_GROUP:
-            return onCreateGroupViewHolder(parent, viewType ^ TYPE_GROUP);
+            return onCreateGroupViewHolder(parent, viewType);
         default:
             throw new IllegalStateException(
                 String.format(Locale.getDefault(), "Illegal view type : viewType[%d]", viewType));
