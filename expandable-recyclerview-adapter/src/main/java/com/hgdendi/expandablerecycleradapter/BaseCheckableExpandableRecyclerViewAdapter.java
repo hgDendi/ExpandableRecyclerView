@@ -306,13 +306,13 @@ public abstract class BaseCheckableExpandableRecyclerViewAdapter
         while (iter.hasNext()) {
             final CheckedItem<GroupBean, ChildBean> checkedItem = iter.next();
             final int[] coord = getCoordFromCheckedItem(checkedItem);
-            final GroupBean originalGroupBean = getGroupItem(coord[0]);
-            final int originalGroupCheckedStatus = getGroupCheckedMode(originalGroupBean);
+            final GroupBean groupBean = getGroupItem(coord[0]);
+            final int originalGroupCheckedStatus = getGroupCheckedMode(groupBean);
             iter.remove();
             final int groupAdapterPosition = getAdapterPosition(coord[0]);
             final int adapterPosition = groupAdapterPosition + coord[1] + 1;
-            notifyItemChanged(adapterPosition);
-            final int currentGroupCheckedStatus = getGroupCheckedMode(originalGroupBean);
+            notifyItemChanged(adapterPosition, PAYLOAD_CHECKMODE);
+            final int currentGroupCheckedStatus = getGroupCheckedMode(groupBean);
             if (coord[1] >= 0 && currentGroupCheckedStatus != originalGroupCheckedStatus) {
                 notifyItemChanged(groupAdapterPosition, PAYLOAD_CHECKMODE);
             }
