@@ -286,7 +286,7 @@ public abstract class BaseExpandableRecyclerViewAdapter
 
     @Override
     public final RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        switch (viewType) {
+        switch (viewType & TYPE_MASK) {
             case TYPE_EMPTY:
                 return mEmptyViewProducer.onCreateViewHolder(parent);
             case TYPE_HEADER:
