@@ -105,6 +105,104 @@ static class ChildVH extends RecyclerView.ViewHolder {
 }
 ```
 
+## ExtraUsage
+
+#### SetListener
+
+Use Adapter#setListener() to add Callback
+
+```java
+public interface ExpandableRecyclerViewOnClickListener<GroupBean extends BaseGroupBean, ChildBean> {
+    /**
+    * called when group item is long clicked
+    *
+    * @param groupItem
+    * @return
+    */
+    boolean onGroupLongClicked(GroupBean groupItem);
+
+    /**
+    * called when an expandable group item is clicked
+    *
+    * @param groupItem
+    * @param isExpand
+    * @return whether intercept the click event
+    */
+    boolean onInterceptGroupExpandEvent(GroupBean groupItem, boolean isExpand);
+
+    /**
+    * called when an unexpandable group item is clicked
+    *
+    * @param groupItem
+    */
+    void onGroupClicked(GroupBean groupItem);
+
+    /**
+    * called when child is clicked
+    *
+    * @param groupItem
+    * @param childItem
+    */
+    void onChildClicked(GroupBean groupItem, ChildBean childItem);
+}
+```
+
+#### ShowEmptyView
+
+Show empty view when list is empty.
+
+```java
+adapter.setEmptyViewProducer(new ViewProducer() {
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent) {
+        View emptyView = LayoutInflater.from(parent.getContext()).inflate(R.layout.empty, parent, false);
+        return new DefaultEmptyViewHolder(emptyView);
+    }
+
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder) {
+    }
+});
+```
+
+#### VariousGroup&Child
+
+Override getGroupType & getChildType.
+
+Override onCreateViewHolder to generate different ViewHolder.(The same as original RecyclerViewAdapter)
+
+```Java
+protected int getGroupType(GroupBean groupBean) {
+    return 0;
+}
+
+abstract public GroupViewHolder onCreateGroupViewHolder(ViewGroup parent, int groupViewType);
+    
+protected int getChildType(GroupBean groupBean, ChildBean childBean) {
+    return 0;
+}
+
+abstract public ChildViewHolder onCreateChildViewHolder(ViewGroup parent, int childViewType);
+```
+
+#### AddHeaderView
+
+```java
+adapter.setEmptyViewProducer(new ViewProducer() {
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent) {
+        View emptyView = LayoutInflater.from(parent.getContext()).inflate(R.layout.header, parent, false);
+        return new DefaultEmptyViewHolder(emptyView);
+    }
+
+    @Override
+    public void onBindViewHolder(RecyclerView.ViewHolder holder) {
+    }
+},false);
+```
+
+
+
 ## License
 
 **MIT**
